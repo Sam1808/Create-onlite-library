@@ -1,4 +1,5 @@
 import argparse
+import glob
 import json
 import os
 from livereload import Server, shell
@@ -18,6 +19,7 @@ def create_template(books_description, step):
 
     folder = 'pages'
     os.makedirs(folder, exist_ok=True)
+    existed_files = set(glob.glob('pages/index*',recursive=False))
 
     books_count = len(books_description)
     books_perpage_catalog = list(chunked(range(0,books_count), step))
@@ -32,10 +34,15 @@ def create_template(books_description, step):
             next_page=page_number+1,
             previous_page=page_number-1,
         )
+
         filename = f'index{page_number}.html'
         filename_path = os.path.join(folder, filename)
         with open(filename_path, 'w', encoding="utf8") as file:
             file.write(rendered_page)
+        existed_files.discard(filename_path)
+
+    for file in existed_files:
+        os.remove(file)
 
 
 if __name__ == '__main__':
